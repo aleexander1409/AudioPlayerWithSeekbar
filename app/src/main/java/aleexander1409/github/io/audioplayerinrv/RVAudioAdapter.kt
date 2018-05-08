@@ -1,15 +1,21 @@
 package aleexander1409.github.io.audioplayerinrv
 
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.SeekBar
 
-class RVAudioAdapter : RecyclerView.Adapter<RVAudioAdapter.RVAudioVH>() {
+class RVAudioAdapter : RecyclerView.Adapter<RVAudioAdapter.RVAudioVH>(), AudioListener {
 
     private var listAudio: List<AudioPlay> = emptyList()
+    private val audioPlayer = AudioPlayerUtil()
+
+    init {
+        audioPlayer.setAudioListener(this)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RVAudioVH {
         return RVAudioVH(LayoutInflater.from(parent.context).inflate(R.layout.item_audio, parent, false))
@@ -28,22 +34,27 @@ class RVAudioAdapter : RecyclerView.Adapter<RVAudioAdapter.RVAudioVH>() {
 
     inner class RVAudioVH(item: View) : RecyclerView.ViewHolder(item) {
 
-        init {
-           item.findViewById<ImageView>(R.id.ivPlay).setOnClickListener {
-                when(listAudio[adapterPosition].stateEnum){
-                    AudioStateEnum.STOPED -> {
-//                        skBar.progress = 0
-                        listAudio[adapterPosition].progress = 0
-                    }
-                    AudioStateEnum.PAUSED -> {
-//                        skBar.progress = audioPlay.progress
-                    }
-                    else -> {
-//                        skBar.progress = audioPlay.progress
-                    }
-                }
-            }
-        }
+//        init {
+//            item.findViewById<ImageView>(R.id.ivPlay).setOnClickListener {
+//                val audioPlay = listAudio[adapterPosition]
+//                when (audioPlay.stateEnum) {
+//                    AudioStateEnum.STOPED -> {
+////                        skBar.progress = 0
+//                        audioPlay.progress = 0
+//                        audioPlayer.play(audioPlay.urlAudio)
+//                        audioPlay.stateEnum = AudioStateEnum.PLAYING
+//                    }
+//                    AudioStateEnum.PAUSED -> {
+//                        audioPlayer.play(audioPlay.urlAudio)
+//                    }
+//                    else -> {
+//                        audioPlayer.pause()
+//                        audioPlay.progress = audioPlayer.durationMillis()
+//                        audioPlay.stateEnum = AudioStateEnum.PAUSED
+//                    }
+//                }
+//            }
+//        }
 
         fun bindView(audioPlay: AudioPlay) {
             val ivPlay = itemView.findViewById<ImageView>(R.id.ivPlay)
@@ -65,19 +76,35 @@ class RVAudioAdapter : RecyclerView.Adapter<RVAudioAdapter.RVAudioVH>() {
             }
 
             ivPlay.setOnClickListener {
-                when(listAudio[adapterPosition].stateEnum){
+                when (audioPlay.stateEnum) {
                     AudioStateEnum.STOPED -> {
-                        skBar.progress = 0
-                        listAudio[adapterPosition].progress = 0
+//                        skBar.progress = 0
+                        audioPlay.progress = 0
+                        audioPlayer.play(audioPlay.urlAudio)
+                        audioPlay.stateEnum = AudioStateEnum.PLAYING
                     }
                     AudioStateEnum.PAUSED -> {
-                        skBar.progress = audioPlay.progress
+                        audioPlayer.play(audioPlay.urlAudio)
                     }
                     else -> {
-                        skBar.progress = audioPlay.progress
+                        audioPlayer.pause()
+                        audioPlay.progress = audioPlayer.durationMillis()
+                        audioPlay.stateEnum = AudioStateEnum.PAUSED
                     }
                 }
             }
         }
+    }
+
+    override fun onAudioDuration(duration: Int) {
+        Log.d("RVAudioAdapter","onAudioDuration : $duration")
+    }
+
+    override fun onProgressListener(progress: Int) {
+        Log.d("RVAudioAdapter","onProgressListener : $progress")
+    }
+
+    override fun onCompleted() {
+        Log.d("RVAudioAdapter","onCompleted")
     }
 }
